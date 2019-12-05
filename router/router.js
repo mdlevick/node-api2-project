@@ -2,12 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 
-const Db = require("../data/db")
+const db = require("../data/db")
 
-router.get("/api/posts/", (req, res) => {
+router.get("/", (req, res) => {
 
-    console.log(req.query);
-    Db.find(req.query)
+    db.find(req.query)
         .then(posts => {
             res.status(200).json(posts);
         })
@@ -19,10 +18,11 @@ router.get("/api/posts/", (req, res) => {
         });
 });
 
-router.get("/api/posts/:id", (req, res) => {
-    Db.findById(req.params.id)
+router.get("/:id", (req, res) => {
+    db.findById(req.params.id)
       .then(post => {
         if (post) {
+            console.log(post)
           res.status(200).json(post);
         } else {
           res.status(404).json({ message: "post not found" });
@@ -36,8 +36,8 @@ router.get("/api/posts/:id", (req, res) => {
       });
   });
 
-  router.post("/api/posts/", (req, res) => {
-    Db.add(req.body)
+  router.post("/", (req, res) => {
+    db.add(req.body)
       .then(post => {
         res.status(201).json(post);
       })
@@ -51,7 +51,8 @@ router.get("/api/posts/:id", (req, res) => {
   });
 
   router.delete("/:id", (req, res) => {
-    Db.remove(req.params.id)
+      const id = req.params.id;
+    db.remove(id)
       .then(count => {
         if (count > 0) {
           res.status(200).json({ message: "The post has been nuked" });
@@ -69,7 +70,8 @@ router.get("/api/posts/:id", (req, res) => {
   
   router.put("/:id", (req, res) => {
     const changes = req.body;
-    Db.update(req.params.id, changes)
+    const id = req.params.id;
+    db.update(id, changes)
       .then(post => {
         if (post) {
           res.status(200).json(post);
@@ -85,11 +87,43 @@ router.get("/api/posts/:id", (req, res) => {
       });
   });
 
+ router.get("/:id/comments", (req, res) => {
+      const id = req.params.id
+    db.findPostComments(id)
+          .then(comments => {
+        res.status(200).json(comments);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({ errorMessage: "error getting post comments" });
+      });
+  });
+  
 
 
-
-
-
-
-
-module.exports = router; 
+ router.get("/:id/comment", (req, res) => {
+    const id = req.params.id
+  db.findCommentById(id)
+      .then(comments => {
+      res.status(200).json(comments);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ errorMessage: "error getting post comments" });
+    });
+});
+  
+  router.post("/:id/comments", (req, res) => {
+    db.insertComment(req.body)
+      .then(comment => {
+        res.status(201).json(comment);
+      })
+     .catch(err => {
+  
+        console.log(err);
+        res.status(500).json({
+          message: "Error adding the comment"
+        });
+      });
+  });
+  module.exports = router; 
