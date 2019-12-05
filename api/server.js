@@ -1,17 +1,16 @@
 const express = require("express");
 
-const seedsRouter = require("../seeds/seeds-router.js"); 
+const router = require("../router/router"); 
 
 const server = express();
 
 server.get("/", (req, res) => {
-  res.send(`
-    <h2>Seeds API</h>
-    <p>Welcome to the Seeds API</p>
-  `);
+  res.send({ api: "Target Acquired"});
 });
 
-server.use("/api/seeds", seedsRouter); 
+//............."/"...."route"
+//........... CRUD>this route
+server.use("/api/posts", router); 
 
 
 module.exports = server; 
